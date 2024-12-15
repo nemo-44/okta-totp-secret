@@ -2,7 +2,7 @@
 # Scan oktaverify QR code and obtain totp secret.
 # The secret can be used in any tool implementing rfc4226 algorithm to generate OTPs
 # (oathtool, Google Authenticator, etc.)
-# Required tools: zbarimg, jq, curl, grep, sed
+# Required tools: zbarimg, curl, grep, sed
 set -eu
 #set -x
 
@@ -21,8 +21,8 @@ parse_parameter()
 URL=$(zbarimg $1)
 DOMAIN=$(parse_parameter "$URL" s)
 DOMAIN=$(echo $DOMAIN | sed 's|^https\?://||')
-# keys is a valid json snippet without the embracing curly brackets
-keys=$(curl -s -f --retry 5 https://$DOMAIN/oauth2/v1/keys | jq .keys[0] | grep -vP '{|}')
+# keys is a valid json snippet without the embracing curly braces
+keys=$(curl -s -f --retry 5 https://$DOMAIN/oauth2/v1/keys | sed -e 's/^{//' -e 's/}$//'
 t=$(parse_parameter "$URL" t)
 f=$(parse_parameter "$URL" f)
 curl --request POST \
